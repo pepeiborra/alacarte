@@ -1,11 +1,23 @@
-name:                lacarte
+name:                alacarte
 version:             0.0
-synopsis:            <Project description>
-description:         <Project description>
+synopsis:            Open data types and open functions via coproduct of signatures
+description:         This library provides the basic building blocks for assembling
+		     both data types and functions from isolated individual components.
 category:            Data
 license:             AllRightsReserved
 license-file:        LICENSE
 author:              Wouter Swierstra
-maintainer:          mnislaih@gmail.com
-build-Depends:       base
-ghc-options:         
+maintainer:          Pepe Iborra <mnislaih@gmail.com>
+
+
+Flag libs
+  description: Have the libraries for the extra instances available
+
+Library
+  build-Depends:       base, typeprelude
+  exposed-modules:     Data.AlaCarte
+  if flag(libs)
+    build-depends: QuickCheck
+    exposed-modules: Data.AlaCarte.Instances
+  else
+    build-depends: 
