@@ -1,19 +1,18 @@
 {-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances  #-}
 module Data.AlaCarte (
-    Expr(..), foldExpr, foldExpr',
+    Expr(..), foldExpr, foldExpr',foldExprM,
     (:+:)(..), (:<:)(..), inject, reinject, match
                      ) where
 import Control.Applicative
-import Data.Foldable
 import Data.Maybe
-import Data.Traversable
-import Control.Monad(liftM)
-import qualified Prelude (getChar,putChar,getLine,readFile,writeFile)
-import Prelude hiding (mapM)
 import TypePrelude
-import TypeEqGeneric1
+import TypeEqGeneric1()
+import Data.Traversable
+import Prelude hiding (mapM)
 
-data Expr f = In (f (Expr f))
+import Data.AlaCarte.Sums
+
+newtype Expr f = In (f (Expr f))
 
 instance Eq (f (Expr f)) => Eq (Expr f) where
     In x == In y = x == y
@@ -21,31 +20,11 @@ instance Eq (f (Expr f)) => Eq (Expr f) where
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a
 foldExpr f (In t) = f (fmap (foldExpr f) t)
 
+foldExprM :: (Monad m, Traversable f) => (f a -> m a) -> Expr f -> m a
+foldExprM f (In t) = f =<< mapM (foldExprM f) t
+
 foldExpr' :: Functor f => (Expr f -> f a -> a) -> Expr f -> a
 foldExpr' f e@(In t) = f e (foldExpr' f `fmap` t)
-
-infixr 6 :+:
-
-data (f :+: g) e = Inl (f e) | Inr (g e)
-
-instance (Eq (f a), Eq (g a)) => Eq ((f :+: g) a) where
-    Inl x == Inl y = x == y
-    Inr x == Inr y = x == y
-    _     == _     = False
-
--- TODO derive Ord,Enum,and so on.., instances
-
-instance (Functor f, Functor g) => Functor (f :+: g) where
-  fmap f (Inl e1)  = Inl (fmap f e1)
-  fmap f (Inr e2)  = Inr (fmap f e2)
-
-instance (Foldable f, Foldable g) => Foldable (f :+: g) where
-    foldMap f (Inl x) = foldMap f x
-    foldMap f (Inr x) = foldMap f x
-
-instance (Traversable f, Traversable g) => Traversable (f :+: g) where
-    traverse f (Inl e1) = Inl <$> traverse f e1
-    traverse f (Inr e1) = Inr <$> traverse f e1
 
 inject :: (g :<: f) => g (Expr f) -> Expr f
 inject = In . inj
@@ -76,6 +55,13 @@ instance (f :<: g) => Compatible f g T
 -- We are going to need two levels actually.
 -- First decompose the lhs, and then the rhs
 
+-- We are now going to try a different thing.
+-- First, we will flatten each tuple of sums into
+-- a plain list. Then we will use standard HList
+-- machinery to determine if the union equals to sup
+-- (or the intersection to sub, or the difference
+-- between sup and the intersection is null).
+
 class (Functor sub, Functor sup) => (:<:) sub sup where
   inj :: sub a -> sup a
   prj :: sup a -> Maybe (sub a)
@@ -87,6 +73,11 @@ instance Functor f => (:<:) f f where
 instance (IsSum f isSum, Functor g, TypTree isSum f g) => (:<:) f g where
   inj = inj1 (proxy::isSum)
   prj = prj1 (proxy::isSum)
+
+instance (Functor f, Functor g) => (:<:) f (f :+: g) where
+    inj = Inl
+    prj (Inl a) = Just a
+    prj _       = Nothing
 
 class (Functor sub, Functor sup) => TypTree isSumSub sub sup where
   inj1 :: isSumSub -> sub a -> sup a

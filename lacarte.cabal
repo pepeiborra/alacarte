@@ -15,7 +15,8 @@ Flag libs
 
 Library
   build-Depends:       base, typeprelude
-  exposed-modules:     Data.AlaCarte
+  exposed-modules:     Data.AlaCarte, Data.AlaCarte.Sums
+  ghc-options:         -O2
   if flag(libs)
     build-depends: QuickCheck
     exposed-modules: Data.AlaCarte.Instances

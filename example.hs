@@ -1,4 +1,4 @@
-{-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances #-}
+{-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-incoherent-instances #-}
 import Data.Maybe
 import Control.Monad(liftM)
 import Test.QuickCheck
@@ -35,6 +35,13 @@ instance (Functor f, Functor g) => Functor (f :+: g) where
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a
 foldExpr f (In t) = f (fmap (foldExpr f) t)
 
+zipWithExpr :: Functor f => (f a -> f a -> a) -> Expr f -> Expr f -> a
+zipWithExpr f a b = 
+  where repeat :: x -> f x -> f x
+        repeat x t = fmap (const x) t
+        zapp :: f (a -> b) -> f a -> f b
+        zapp 
+
 class Functor f => Eval f where
   evalAlgebra :: f Int -> Int
 
@@ -55,16 +62,22 @@ infixl 6 <+>
 
 class (Functor sub, Functor sup) => (:<:) sub sup where
   inj :: sub a -> sup a
+  prj :: sup a -> Maybe (sub a)
 
 instance Functor f => (:<:) f f where
   inj = id
+  prj = Just
 
 instance (Functor f, Functor g) => (:<:) f (f :+: g) where
   inj = Inl
+  prj (Inl t) = Just t
+  prj _       = Nothing
 
 instance (Functor f, Functor g, Functor h, (:<:) f g) => 
   (:<:) f (h :+: g) where
     inj = Inr . inj
+    prj (Inl t) = Nothing
+    prj (Inr t) = prj t
 
 inject :: ((:<:) g f) => g (Expr f) -> Expr f
 inject = In . inj
