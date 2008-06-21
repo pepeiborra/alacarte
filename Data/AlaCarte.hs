@@ -1,4 +1,4 @@
-{-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances  #-}
+{-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances #-}
 module Data.AlaCarte (
     Expr(..), foldExpr, foldExpr',foldExprM,
     (:+:)(..), (:<:)(..), inject, reinject, match
