@@ -87,9 +87,17 @@ instance (Functor l, Functor r) => TypTree HTrue (l :+: r) (l :+: r) where
   inj1 _ = id
   prj1 _ = Just
 
-instance (f :<: h, g :<: h) => TypTree HTrue (f :+: g) h where
+instance (g :<: i, Functor f) => TypTree HTrue (f :+: g) (f :+: i) where
   inj1 _ (Inl l) = inj l
-  inj1 _ (Inr l) = inj l
+  inj1 _ (Inr r) = (Inr $ inj r)
+  prj1 _ (Inl l) = Just $ Inl l
+  prj1 _ (Inr r) = Inr <$> prj r
+
+instance (f :<: i, Functor g) => TypTree HTrue (f :+: g) (g :+: i) where
+  inj1 _ (Inl l) = (Inr $ inj l)
+  inj1 _ (Inr r) = inj r
+  prj1 _ (Inl l) = Just $ Inr l
+  prj1 _ (Inr r) = Inl <$> prj r
 
 {-
 instance (Functor f, Functor g) => TypTree f (f :+: g) where
