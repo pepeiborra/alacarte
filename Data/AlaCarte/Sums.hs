@@ -1,5 +1,9 @@
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies #-}
+
 
 module Data.AlaCarte.Sums where
 
@@ -30,3 +34,9 @@ instance (Foldable f, Foldable g) => Foldable (f :+: g) where
 instance (Traversable f, Traversable g) => Traversable (f :+: g) where
     traverse f (Inl e1) = Inl <$> traverse f e1
     traverse f (Inr e1) = Inr <$> traverse f e1
+
+
+class Subst (g :: * -> *) (f1 :: * -> *) (f2 :: * -> *) (h :: * -> *) | g f1 f2 -> h
+instance Subst f1 f1 f2 f2
+instance Subst (f1 :+: f) f1 f2 (f2 :+: f)
+instance Subst g f1 f2 g2 => Subst (f :+: g) f1 f2 (f :+: g2)
