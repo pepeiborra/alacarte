@@ -1,10 +1,11 @@
 {-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances #-}
 module Data.AlaCarte (
-    Expr(..), foldExpr, foldExpr',foldExprM,
-    (:+:)(..), (:<:)(..), inject, reinject, match
+    Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
+    WithNote(..), (:+:)(..), (:<:)(..), inject, reinject, match
                      ) where
 import Control.Applicative
-import Data.Maybe
+import Data.Foldable
+import Data.Traversable
 import TypePrelude
 import TypeEqGeneric1()
 import Data.Traversable
@@ -17,14 +18,21 @@ newtype Expr f = In (f (Expr f))
 instance Eq (f (Expr f)) => Eq (Expr f) where
     In x == In y = x == y
 
+-- | Bottom traversal
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a
 foldExpr f (In t) = f (fmap (foldExpr f) t)
 
+-- | Bottom traversal, monadic
 foldExprM :: (Monad m, Traversable f) => (f a -> m a) -> Expr f -> m a
 foldExprM f (In t) = f =<< mapM (foldExprM f) t
 
+-- | Bottom traversal with visibility of the original value
 foldExpr' :: Functor f => (Expr f -> f a -> a) -> Expr f -> a
 foldExpr' f e@(In t) = f e (foldExpr' f `fmap` t)
+
+-- | Top traversal
+foldExprTop :: Functor f => (f (Expr f) -> f(Expr f)) -> Expr f -> Expr f
+foldExprTop f (In t) = In (foldExprTop f `fmap` (f t))
 
 inject :: (g :<: f) => g (Expr f) -> Expr f
 inject = In . inj
@@ -34,6 +42,13 @@ match (In t) = prj t
 
 reinject :: (f :<: g) => Expr f -> Expr g
 reinject = foldExpr inject
+
+newtype WithNote note f a = Note (note, f a) deriving (Show)
+instance Functor f  => Functor (WithNote note f)  where fmap f (Note (p, fx))   = Note (p, fmap f fx)
+instance Foldable f => Foldable (WithNote note f) where foldMap f (Note (_p,fx)) = foldMap f fx
+instance Traversable f => Traversable (WithNote note f) where traverse f (Note (p, fx)) = (Note . (,) p) <$> traverse f fx
+instance Eq (f a) => Eq (WithNote note f a) where Note (_, f1) == Note (_, f2) = f1 == f2
+instance Ord (f a) => Ord (WithNote note f a) where Note (_, f1) `compare` Note (_, f2) = compare f1 f2
 
 {-      Compatible won't fly.
         The Haskell type checker is no theorem prover
