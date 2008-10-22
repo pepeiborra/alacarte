@@ -1,0 +1,25 @@
+name:                alacarte
+Cabal-Version:       >= 1.2
+version:             0.1
+synopsis:            Open data types and open functions via coproduct of signatures
+description:         This library provides the basic building blocks for assembling
+		     both data types and functions from isolated individual components.
+category:            Data
+license:             AllRightsReserved
+license-file:        LICENSE
+author:              Wouter Swierstra
+maintainer:          Pepe Iborra <mnislaih@gmail.com>
+
+
+Flag libs
+  description: Have the libraries for the extra instances available
+
+Library
+  build-Depends:       base, typeprelude
+  exposed-modules:     Data.AlaCarte, Data.AlaCarte.Sums
+  ghc-options:         -O2
+  if flag(libs)
+    build-depends: QuickCheck >= 2.0
+    exposed-modules: Data.AlaCarte.Instances
+  else
+    build-depends: 
