@@ -4,6 +4,8 @@ module Data.AlaCarte (
     WithNote(..), (:+:)(..), (:<:)(..), inject, reinject, match
                      ) where
 import Control.Applicative
+import Control.Monad((>=>))
+import Control.Arrow
 import Data.Foldable
 import Data.Traversable
 import TypePrelude
@@ -15,8 +17,7 @@ import Data.AlaCarte.Sums
 
 newtype Expr f = In (f (Expr f))
 
-instance Eq (f (Expr f)) => Eq (Expr f) where
-    In x == In y = x == y
+instance Eq (f (Expr f)) => Eq (Expr f) where In x == In y = x == y
 
 -- | Bottom traversal
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a
@@ -90,9 +91,9 @@ instance (IsSum f isSum, Functor g, TypTree isSum f g) => (:<:) f g where
   prj = prj1 (proxy::isSum)
 
 instance (Functor f, Functor g) => (:<:) f (f :+: g) where
-    inj = Inl
-    prj (Inl a) = Just a
-    prj _       = Nothing
+  inj = Inl
+  prj (Inl a) = Just a
+  prj _       = Nothing
 
 class (Functor sub, Functor sup) => TypTree isSumSub sub sup where
   inj1 :: isSumSub -> sub a -> sup a
@@ -114,18 +115,22 @@ instance (f :<: i, Functor g) => TypTree HTrue (f :+: g) (g :+: i) where
   prj1 _ (Inl l) = Just $ Inr l
   prj1 _ (Inr r) = Inl <$> prj r
 
+
+-- Transitivity, an impossible dream
+--instance (Functor a, a :<: b, b :<: c) => (:<:) a c
+
 {-
 instance (Functor f, Functor g) => TypTree f (f :+: g) where
   inj = Inl
   prj (Inl t) = Just t
   prj _       = Nothing
-
-instance (Functor f, Functor g, Functor h, TypTree f g) => 
-  TypTree f (h :+: g) where
-    inj = Inr . inj
-    prj (Inl t) = Nothing
-    prj (Inr t) = prj t
 -}
+instance (Functor f, Functor g, Functor h, TypTree HTrue f g) =>
+  TypTree HTrue f (h :+: g) where
+    inj1 _         = Inr . inj1 (proxy::HTrue)
+    prj1 _ (Inl t) = Nothing
+    prj1 _ (Inr t) = prj1 (proxy::HTrue) t
+
 
 -- TypTree.  This is basically the same as (:<:) in the paper.
 
@@ -163,9 +168,12 @@ instance (IsTreeMember x l b, TypTree' b x l r) => TypTree HFalse x (l :+: r) wh
     inj1 _ = treeInj' (undefined :: b)
     prj1 _ = treePrj' (undefined :: b)
 
--- Transitivity, an impossible dream
--- instance (Functor a, b :<: c, a :<: b) => (:<:) a c
-
+{-
+-- Transitivity. Makes GHC loop !
+instance forall sub b sup .  (sub :<: b, b :<: sup) => TypTree HFalse sub sup where
+    inj1 _ = ((inj :: b a -> sup a) . inj)
+    prj1 s = (prj :: sup a -> Maybe (b a)) >=> prj
+-}
 ----------------------------------------------
 class TypOr b1 b2 res | b1 b2 -> res
 instance TypOr HFalse HFalse HFalse

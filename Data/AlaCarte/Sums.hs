@@ -14,14 +14,7 @@ import Data.Traversable
 
 infixr 6 :+:
 
-data (f :+: g) e = Inl (f e) | Inr (g e)
-
-instance (Eq (f a), Eq (g a)) => Eq ((f :+: g) a) where
-    Inl x == Inl y = x == y
-    Inr x == Inr y = x == y
-    _     == _     = False
-
--- TODO derive Ord,Enum,and so on.., instances
+data (f :+: g) e = Inl (f e) | Inr (g e) deriving (Eq, Ord)
 
 instance (Functor f, Functor g) => Functor (f :+: g) where
   fmap f (Inl e1)  = Inl (fmap f e1)
