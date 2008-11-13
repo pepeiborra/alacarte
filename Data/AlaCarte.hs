@@ -1,7 +1,7 @@
 {-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances #-}
 module Data.AlaCarte (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
-    WithNote(..), (:+:)(..), (:<:)(..), inject, reinject, match
+    (:+:)(..), (:<:)(..), inject, reinject, match
                      ) where
 import Control.Applicative
 import Control.Monad((>=>))
@@ -43,13 +43,6 @@ match (In t) = prj t
 
 reinject :: (f :<: g) => Expr f -> Expr g
 reinject = foldExpr inject
-
-newtype WithNote note f a = Note (note, f a) deriving (Show)
-instance Functor f  => Functor (WithNote note f)  where fmap f (Note (p, fx))   = Note (p, fmap f fx)
-instance Foldable f => Foldable (WithNote note f) where foldMap f (Note (_p,fx)) = foldMap f fx
-instance Traversable f => Traversable (WithNote note f) where traverse f (Note (p, fx)) = (Note . (,) p) <$> traverse f fx
-instance Eq (f a) => Eq (WithNote note f a) where Note (_, f1) == Note (_, f2) = f1 == f2
-instance Ord (f a) => Ord (WithNote note f a) where Note (_, f1) `compare` Note (_, f2) = compare f1 f2
 
 {-      Compatible won't fly.
         The Haskell type checker is no theorem prover
