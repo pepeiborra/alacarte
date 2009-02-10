@@ -5,7 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies #-}
 
 
-module Data.AlaCarte.Sums where
+module Data.AlaCarte.CoProducts where
 
 import Control.Applicative
 import Data.Foldable

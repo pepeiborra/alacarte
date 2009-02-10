@@ -1,4 +1,5 @@
 name:                alacarte
+build-type:          Simple
 Cabal-Version:       >= 1.2
 version:             0.1
 synopsis:            Open data types and open functions via coproduct of signatures
@@ -16,7 +17,7 @@ Flag libs
 
 Library
   build-Depends:       base, typeprelude
-  exposed-modules:     Data.AlaCarte, Data.AlaCarte.Sums
+  exposed-modules:     Data.AlaCarte, Data.AlaCarte.CoProducts
   ghc-options:         -O2
   if flag(libs)
     build-depends: QuickCheck >= 2.0, parallel
