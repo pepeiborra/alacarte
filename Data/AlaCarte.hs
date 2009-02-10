@@ -1,19 +1,20 @@
 {-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances #-}
 module Data.AlaCarte (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
-    (:+:)(..), (:<:)(..), inject, reinject, match
+    (:+:)(..), (:<:)(..), inject, reinject, match, WithNote(..)
                      ) where
 import Control.Applicative
 import Control.Monad((>=>))
 import Control.Arrow
 import Data.Foldable
+import Data.Monoid
 import Data.Traversable
 import TypePrelude
 import TypeEqGeneric1()
 import Data.Traversable
 import Prelude hiding (mapM)
 
-import Data.AlaCarte.Sums
+import Data.AlaCarte.CoProducts
 
 newtype Expr f = In (f (Expr f))
 
@@ -177,3 +178,23 @@ instance TypOr HTrue  HTrue  HTrue
 class IsSum (f :: * -> *) b | f -> b
 instance IsSum (a :+: b) HTrue
 instance false ~ HFalse => IsSum f false
+
+
+-- Annotations
+-- -----------
+-- These are defined here to enable defining a suitable (:<:) instance
+
+newtype WithNote note f a = Note (note, f a) deriving (Show)
+instance Functor f  => Functor (WithNote note f)  where fmap f (Note (p, fx))   = Note (p, fmap f fx)
+instance Foldable f => Foldable (WithNote note f) where foldMap f (Note (_p,fx)) = foldMap f fx
+instance Traversable f => Traversable (WithNote note f) where traverse f (Note (p, fx)) = (Note . (,) p) <$> traverse f fx
+
+{-
+instance (f :<: g, Monoid note) => (:<:) f (WithNote note g) where
+    inj x = Note (mempty, inj x)
+    prj (Note (_, x)) = prj x
+-}
+
+instance (f :<: g, Monoid note) => TypTree HFalse f (WithNote note g) where
+  inj1 _ x = Note (mempty, inj x)
+  prj1 _ (Note (_, x)) = prj x
