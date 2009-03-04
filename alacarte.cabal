@@ -6,7 +6,7 @@ synopsis:            Open data types and open functions via coproduct of signatu
 description:         This library provides the basic building blocks for assembling
 		     both data types and functions from isolated individual components.
 category:            Data
-license:             AllRightsReserved
+license:             BSD3
 license-file:        LICENSE
 author:              Wouter Swierstra
 maintainer:          Pepe Iborra <mnislaih@gmail.com>
