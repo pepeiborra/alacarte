@@ -16,7 +16,7 @@ Flag libs
   description: Have the libraries for the extra instances available
 
 Library
-  build-Depends:       base, typeprelude
+  build-Depends:       base
   exposed-modules:     Data.AlaCarte, Data.AlaCarte.CoProducts
   ghc-options:         -O2
   if flag(libs)

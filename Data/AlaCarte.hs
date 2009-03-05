@@ -1,4 +1,11 @@
-{-#  OPTIONS_GHC -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances #-}
+{-# LANGUAGE OverlappingInstances, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies #-}
+{-# LANGUAGE KindSignatures, TypeOperators #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Data.AlaCarte (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
     (:+:)(..), (:<:)(..), inject, reinject, match, WithNote(..)
@@ -8,9 +15,6 @@ import Control.Monad((>=>))
 import Control.Arrow
 import Data.Foldable
 import Data.Monoid
-import Data.Traversable
-import TypePrelude
-import TypeEqGeneric1()
 import Data.Traversable
 import Prelude hiding (mapM)
 
@@ -169,15 +173,6 @@ instance forall sub b sup .  (sub :<: b, b :<: sup) => TypTree HFalse sub sup wh
     prj1 s = (prj :: sup a -> Maybe (b a)) >=> prj
 -}
 ----------------------------------------------
-class TypOr b1 b2 res | b1 b2 -> res
-instance TypOr HFalse HFalse HFalse
-instance TypOr HFalse HTrue  HTrue
-instance TypOr HTrue  HFalse HTrue
-instance TypOr HTrue  HTrue  HTrue
-
-class IsSum (f :: * -> *) b | f -> b
-instance IsSum (a :+: b) HTrue
-instance false ~ HFalse => IsSum f false
 
 
 -- Annotations
@@ -198,3 +193,35 @@ instance (f :<: g, Monoid note) => (:<:) f (WithNote note g) where
 instance (f :<: g, Monoid note) => TypTree HFalse f (WithNote note g) where
   inj1 _ x = Note (mempty, inj x)
   prj1 _ (Note (_, x)) = prj x
+
+-- -----------------
+-- Type level
+-- -----------------
+proxy :: a
+proxy = undefined
+
+data HTrue
+data HFalse
+class HBool x; instance HBool HTrue; instance HBool HFalse
+
+class HBool b => TypeEq x y b | x y -> b
+class HBool b => TypeEq2 (x :: * -> *) (y :: * -> *) b | x y -> b
+class HBool b => TypeEq3 (x :: (* -> *) -> *) (y :: (* -> *) -> *) b | x y -> b
+
+instance TypeEq  x x HTrue
+instance TypeEq2 x x HTrue
+instance TypeEq3 x x HTrue
+
+instance (b ~ HFalse) => TypeEq  x y b
+instance (b ~ HFalse) => TypeEq2 x y b
+instance (b ~ HFalse) => TypeEq3 x y b
+
+class TypOr b1 b2 res | b1 b2 -> res
+instance TypOr HFalse HFalse HFalse
+instance TypOr HFalse HTrue  HTrue
+instance TypOr HTrue  HFalse HTrue
+instance TypOr HTrue  HTrue  HTrue
+
+class IsSum (f :: * -> *) b | f -> b
+instance IsSum (a :+: b) HTrue
+instance false ~ HFalse => IsSum f false
