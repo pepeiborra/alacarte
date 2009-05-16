@@ -1,4 +1,4 @@
-module Data.AlaCarte.Ppr where
+module Data.AlaCarte.Ppr (module Data.AlaCarte, PprF(..), pprExpr) where
 
 import Data.AlaCarte
 import Text.PrettyPrint (Doc)
