@@ -16,8 +16,8 @@ Flag libs
   description: Have the libraries for the extra instances available
 
 Library
-  build-Depends:       base
-  exposed-modules:     Data.AlaCarte, Data.AlaCarte.CoProducts
+  build-Depends:       base, pretty
+  exposed-modules:     Data.AlaCarte, Data.AlaCarte.CoProducts, Data.AlaCarte.Ppr
   ghc-options:         -O2
   if flag(libs)
     build-depends: QuickCheck >= 2.0, parallel
