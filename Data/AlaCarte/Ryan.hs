@@ -8,7 +8,7 @@
 
 module Data.AlaCarte.Ryan (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
-    (:+:)(..), (:<:)(..), inject, reinject, match, WithNote(..)
+    (:+:)(..), (:<:)(..), inject, reinject, reinjectMaybe, match, WithNote(..)
                      ) where
 import Control.Applicative
 import Control.Monad((>=>), mplus)
@@ -50,6 +50,12 @@ match (In t) = prj t
 reinject :: (f :<: g) => Expr f -> Expr g
 reinject = foldExpr inject
 
+
+-- | 'reinject' with failure.
+--   Useful if you want to obtain a 'Expr r' from a 'Expr (l :+: r)'
+reinjectMaybe :: (g :<: f, Traversable f) => Expr f -> Maybe (Expr g)
+reinjectMaybe = foldExprM (fmap In . prj)
+
 -- Subsumption encoding provided by Ryan Ingram in
 --  http://www.haskell.org/pipermail/haskell-cafe/2008-February/040098.html
 -- and mutilated by myself.
@@ -57,6 +63,7 @@ reinject = foldExpr inject
 class (Functor sub, Functor sup) => (:<:) sub sup where
   inj :: sub a -> sup a
   prj :: sup a -> Maybe (sub a)
+
 
 instance Functor f => (:<:) f f where
   inj = id
