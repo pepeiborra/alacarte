@@ -22,7 +22,7 @@ Library
                        Data.AlaCarte.Ryan,
                        Data.AlaCarte.CoProducts,
                        Data.AlaCarte.Ppr
-  ghc-options:         -O2
+  ghc-options:         
   if flag(libs)
     build-depends: QuickCheck, parallel
     exposed-modules: Data.AlaCarte.Instances
