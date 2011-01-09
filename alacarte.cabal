@@ -1,7 +1,7 @@
 name:                alacarte
 build-type:          Simple
 Cabal-Version:       >= 1.2
-version:             0.5
+version:             0.5.0.1
 synopsis:            Open data types and open functions via coproduct of signatures
 description:         This library provides the basic building blocks for assembling
 		     both data types and functions from isolated individual components.
