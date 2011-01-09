@@ -3,7 +3,7 @@
 module Data.AlaCarte.Instances where
 
 import Control.Applicative
-import Control.Parallel.Strategies
+import Control.DeepSeq
 import Data.AlaCarte
 import Test.QuickCheck
 

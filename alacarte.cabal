@@ -24,7 +24,7 @@ Library
                        Data.AlaCarte.Ppr
   ghc-options:         
   if flag(libs)
-    build-depends: QuickCheck, parallel
+    build-depends: QuickCheck, deepseq
     exposed-modules: Data.AlaCarte.Instances
   else
     build-depends: 
