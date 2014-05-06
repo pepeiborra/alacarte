@@ -6,6 +6,7 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Data.AlaCarte.Ryan (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
@@ -26,7 +27,6 @@ newtype Expr f = In (f (Expr f))
 
 instance Eq (f (Expr f)) => Eq (Expr f) where In x == In y = x == y
 instance Ord (f(Expr f)) => Ord (Expr f) where compare (In x) (In y) = compare x y
-instance Typeable11 Expr where
 
 -- | Bottom traversal
 foldExpr :: Functor f => (f a -> a) -> Expr f -> a

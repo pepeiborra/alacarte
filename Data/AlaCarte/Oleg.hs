@@ -144,12 +144,10 @@ instance IsSub'' HNothing f g h HNothing where
 
 {- not ok, but what I want to do
 
-instance (Functor f, Functor g, Functor h, (:<:) f g) => (:<:) f (g :+: 
-h) where
+instance (Functor f, Functor g, Functor h, (:<:) f g) => (:<:) f (g :+: h) where
 inj1 = Inl . inj1
 
-instance (Functor f, Functor g, Functor h, (:<:) f h) => (:<:) f (g :+: 
-h) where
+instance (Functor f, Functor g, Functor h, (:<:) f h) => (:<:) f (g :+: h) where
 inj1 = Inr . inj1
 
 -}
