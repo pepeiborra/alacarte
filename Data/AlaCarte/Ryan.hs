@@ -6,7 +6,7 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
 
 module Data.AlaCarte.Ryan (
     Expr(..), foldExpr, foldExpr',foldExprM, foldExprTop,
@@ -20,10 +20,11 @@ import Data.Monoid
 import Data.Traversable
 import Data.Typeable
 import Prelude hiding (mapM)
+import GHC.Generics (Generic)
 
 import Data.AlaCarte.CoProducts
 
-newtype Expr f = In (f (Expr f))
+newtype Expr f = In (f (Expr f)) deriving Generic
 
 instance Eq (f (Expr f)) => Eq (Expr f) where In x == In y = x == y
 instance Ord (f(Expr f)) => Ord (Expr f) where compare (In x) (In y) = compare x y

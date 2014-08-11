@@ -12,18 +12,9 @@ author:              Wouter Swierstra
 maintainer:          Pepe Iborra <mnislaih@gmail.com>
 
 
-Flag libs
-  description: Have the libraries for the extra instances available
-
 Library
-  build-Depends:       base, pretty
+  build-Depends:       base, pretty, QuickCheck, deepseq
   exposed-modules:     Data.AlaCarte,
                        Data.AlaCarte.Ryan,
                        Data.AlaCarte.CoProducts,
                        Data.AlaCarte.Ppr
-  ghc-options:         
-  if flag(libs)
-    build-depends: QuickCheck, deepseq
-    exposed-modules: Data.AlaCarte.Instances
-  else
-    build-depends: 

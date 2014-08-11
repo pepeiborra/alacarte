@@ -4,7 +4,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies #-}
-{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
 
 module Data.AlaCarte.CoProducts where
 
@@ -12,10 +12,11 @@ import Control.Applicative
 import Data.Foldable
 import Data.Traversable
 import Data.Typeable
+import GHC.Generics(Generic)
 
 infixr 6 :+:
 
-data (f :+: g) e = Inl (f e) | Inr (g e) deriving (Eq, Ord, Typeable)
+data (f :+: g) e = Inl (f e) | Inr (g e) deriving (Eq, Ord, Typeable, Generic)
 
 instance (Functor f, Functor g) => Functor (f :+: g) where
   fmap f (Inl e1)  = Inl (fmap f e1)
